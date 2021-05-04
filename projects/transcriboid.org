@@ -1,0 +1,11 @@
+#+TITLE:
+#+TITLE:       Transcriboid
+#+AUTHOR:      Ethan Leba
+#+EMAIL:       ethanleba5@gmail.com
+#+DATE:        2021-05-04 Tue
+#+URI:         /projects/transcriboid
+#+KEYWORDS:    React.js, Javascript, Python, Flask
+#+TAGS:        React.js, Javascript, Python, Flask
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: A musical ear trainer
