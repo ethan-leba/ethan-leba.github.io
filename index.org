@@ -1,3 +1,16 @@
-#+TITLE: Index
+#+TITLE: Greetings, traveller. What brings you to these parts?
 
-This is the home page of Ethan Leba.
+Please, take a seat and warm your frozen boots by the hearth. Would you like a
+drink? A pair of warm socks? No? Well, if you must know about me... I'm a:
+
+- 3rd year computer science student at Northeastern University
+- Fledgling developer and open source dabbler
+- Compulsive emacs tinkerer
+- Lover and rider of bicycles
+- Amateur guitarist and rock music listener
+- (917) New Yorker
+
+I could go on, but I know you there must be more important topics at hand. If
+you've come to seek the [[google:foobar][projects]] I've worked on, or the [[google:baz][work experience]] I've
+had, well, look no further. If you're only seeking shelter for the night, I
+can point you on your way to [[https://www.linkedin.com/in/ethan-leba/][LinkedIn]] or [[https://github.com/ethan-leba][GitHub]].
