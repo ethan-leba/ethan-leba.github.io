@@ -1,4 +1,3 @@
-#+TITLE:
 #+TITLE:       Transcriboid
 #+AUTHOR:      Ethan Leba
 #+EMAIL:       ethanleba5@gmail.com
