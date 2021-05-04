@@ -7,4 +7,17 @@
 #+TAGS:        React.js, Javascript, Python, Flask
 #+LANGUAGE:    en
 #+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
-#+DESCRIPTION: A musical ear trainer
+#+DESCRIPTION: A musical ear trainer web app
+
+Check it out [[http://transcriboid.ethanleba.com/#/][here]]!
+
+Transcriboid is a web application that generates melodies and challenges the
+user to transcribe the melodies to sheet music using their ears. This was my
+first hands-on experience building a web app with a backend.
+
+* Links to source
+
+- https://github.com/ethan-leba/transcriboid-frontend
+- https://github.com/ethan-leba/transcriboid-backend
+
+This project is *completed* as of *Summer 2019*.
