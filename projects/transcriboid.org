@@ -14,7 +14,6 @@ Check it out [[http://transcriboid.ethanleba.com/#/][here]]!
 Transcriboid is a web application that generates melodies and challenges the
 user to transcribe the melodies to sheet music using their ears. This was my
 first hands-on experience building a web app with a backend.
-
 * Links to source
 
 - https://github.com/ethan-leba/transcriboid-frontend

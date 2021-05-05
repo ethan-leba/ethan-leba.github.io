@@ -9,6 +9,5 @@ Please, take a seat. Would you like a drink? Well, if you must know about me...
 - Amateur guitarist and rock music listener
 - (917) New Yorker
 
-If you've come to seek the [[google:foobar][projects]] I've worked on, or the [[google:baz][work experience]] I've
-had, well, look no further. If you're only seeking shelter for the night, I can
-point you on your way to [[https://www.linkedin.com/in/ethan-leba/][LinkedIn]] or [[https://github.com/ethan-leba][GitHub]].
+If you've come to seek the projects I've worked on, look no further. If you're
+only passing by, I can point you on your way to [[https://www.linkedin.com/in/ethan-leba/][LinkedIn]] or [[https://github.com/ethan-leba][GitHub]].
