@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Ethan Leba</title>
+    <link>http://www.ethanleba.com</link>
+    <description>foo bar</description>
+    <pubDate>Wed, 05 May 2021 17:52:44 EDT</pubDate>
+    <lastBuildDate>Wed, 05 May 2021 17:52:44 EDT</lastBuildDate>
+    <docs>http://www.rssboard.org/rss-specification</docs>
+    <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
+    <item>
+      <title>Transcriboid</title>
+      <link>http://www.ethanleba.com/projects/transcriboid</link>
+      <description><![CDATA[A musical ear trainer web app]]></description>
+      <pubDate>2021-05-04</pubDate>
+      <guid>http://www.ethanleba.com/projects/transcriboid</guid>
+    </item>
+  </channel>
+</rss>
