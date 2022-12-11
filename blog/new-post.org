@@ -1,0 +1,63 @@
+#+TITLE:       eatring food for fun and porfit
+#+AUTHOR:      Ethan Leba
+#+EMAIL:       ethanleba5@gmail.com
+#+DATE:        2022-12-11 Sun
+#+URI:         /blog/eatring-food-for-fun-and-porfit
+#+KEYWORDS:    emacs, tree-sitter
+#+TAGS:        emacs, tree-sitter
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: Trrree
+
+Tree-sitter support has officially landed into Emacs 29, which is awesome! However, unlike the 3rd party version of [[https://github.com/emacs-tree-sitter/elisp-tree-sitter][emacs-tree-sitter]] which provides [[https://github.com/emacs-tree-sitter/tree-sitter-langs][a set of grammars as a package]], there's no easy way to install grammars with the newly builtin tree-sitter (AFAIK). The best option I've seen online so far is to clone [[https://github.com/casouri/tree-sitter-module][casouri/tree-sitter-module]], and run some scripts manually. I think we can all agree that's not ideal!
+
+Back when I was working on [[https://github.com/ethan-leba/tree-edit][tree-edit]] (I swear I'll get back to it eventually!), I realized that most grammars in their current states were poorly constructed for structural editing. So I needed to come up with an easy way for users to install custom grammars outside of what =tree-sitter-langs= provided. As it turns out, now there's no =tree-sitter-langs= equivalent for the built-in tree-sitter, this may be a generally useful technique.
+
+[[https://github.com/radian-software/straight.el][straight.el]] allows us to specify a =:post-build= keyword, in which we can specify any abritrary elisp to run after a package is built (or any shell commands too, for that matter). So we can use =straight= to clone a tree-sitter grammar, and then use the =:post-build= step to compile the grammar and place it somewhere =treesit= can use it.
+
+#+begin_src emacs-lisp
+(package! tree-sitter-rust
+  :recipe (:host github
+           :repo "tree-sitter/tree-sitter-rust"
+           :post-build
+           (my/tree-sitter-compile-grammar
+            (expand-file-name "ts-grammars" user-emacs-directory))))
+#+end_src
+
+
+
+#+begin_src emacs-lisp
+(defun my/tree-sitter-compile-grammar (destination &optional path)
+  "Compile grammar at PATH, and place the resulting shared library in DESTINATION."
+  (interactive "fWhere should we put the shared library? \nfWhat tree-sitter grammar are we compiling? \n")
+  (make-directory destination 'parents)
+
+  (let* ((default-directory
+          (expand-file-name "src/" (or path default-directory)))
+         (parser-name
+          (thread-last (expand-file-name "grammar.json" default-directory)
+                       (json-read-file)
+                       (alist-get 'name)))
+         (emacs-module-url
+          "https://raw.githubusercontent.com/casouri/tree-sitter-module/master/emacs-module.h")
+         (tree-sitter-lang-in-url
+          "https://raw.githubusercontent.com/casouri/tree-sitter-module/master/tree-sitter-lang.in")
+         (needs-cpp-compiler nil))
+    (message "Compiling grammar at %s" path)
+
+    (url-copy-file emacs-module-url "emacs-module.h" :ok-if-already-exists)
+    (url-copy-file tree-sitter-lang-in-url "tree-sitter-lang.in" :ok-if-already-exists)
+
+    (with-temp-buffer
+      (unless
+          (zerop
+           (apply #'call-process
+                  (if (file-exists-p "scanner.cc") "c++" "cc") nil t nil
+                  "parser.c" "-I." "--shared" "-o"
+                  (expand-file-name (format "libtree-sitter-%s%s" parser-name module-file-suffix) destination)
+                  (cond ((file-exists-p "scanner.c") '("scanner.c"))
+                        ((file-exists-p "scanner.cc") '("scanner.cc")))))
+        (error "Unable to compile grammar, please file a bug report\n%s" (buffer-string))))
+
+    (message "Completed compilation")))
+#+end_src
