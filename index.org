@@ -2,7 +2,7 @@
 
 Please, take a seat. Would you like a drink? Well, if you must know about me...
 
-- 3rd year computer science student at Northeastern University
+- =Nth= year computer science student at Northeastern University
 - Fledgling developer and open source dabbler
 - Compulsive emacs tinkerer
 - Lover and rider of bicycles

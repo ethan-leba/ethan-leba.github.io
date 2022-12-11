@@ -1,0 +1,82 @@
+#+TITLE:       (Ab)using straight.el for easy tree-sitter grammar installations!
+#+AUTHOR:      Ethan Leba
+#+EMAIL:       ethanleba5@gmail.com
+#+DATE:        2022-12-12 Mon
+#+URI:         /blog/%y/%m/%d/(ab)using-straightel-for-easy-tree-sitter-grammar-installations
+#+TAGS:        emacs, tree-sitter, straight
+#+LANGUAGE:    en
+#+OPTIONS:     H:3 num:nil toc:nil \n:nil ::t |:t ^:nil -:nil f:t *:t <:t
+#+DESCRIPTION: :post-build ftw
+
+Tree-sitter support has officially landed into Emacs 29, which is awesome! However, unlike the 3rd party version of [[https://github.com/emacs-tree-sitter/elisp-tree-sitter][emacs-tree-sitter]] which provides [[https://github.com/emacs-tree-sitter/tree-sitter-langs][a set of grammars as a package]], there's no easy way to install grammars with the newly builtin tree-sitter (AFAIK). The best option I've seen online so far is to clone [[https://github.com/casouri/tree-sitter-module][casouri/tree-sitter-module]], and run some scripts manually. I think we can all agree that's not ideal!
+
+Back when I was working on [[https://github.com/ethan-leba/tree-edit][tree-edit]] (I swear I'll get back to it soon™!), I realized that most grammars in their current states were poorly constructed for structural editing. So I needed to come up with an easy way for users to install custom grammars outside of what =tree-sitter-langs= provided. As it turns out, now that there's no =tree-sitter-langs= equivalent for the built-in tree-sitter, this could be a quite useful technique!
+
+** The technique
+
+[[https://github.com/radian-software/straight.el][straight.el]] allows us to specify a =:post-build= keyword, in which we can specify any abritrary elisp to run after a package is built (or any shell commands too, for that matter). So we can use =straight= to clone a tree-sitter grammar, and then use the =:post-build= step to compile the grammar and place it somewhere =treesit= can use it. Here's an example of how you might do this:
+
+#+begin_src emacs-lisp
+(package! tree-sitter-rust
+  :recipe (:host github
+           :repo "tree-sitter/tree-sitter-rust"
+           :post-build
+           (my/tree-sitter-compile-grammar
+            (expand-file-name "ts-grammars" user-emacs-directory))))
+#+end_src
+
+This is [[https://github.com/doomemacs/doomemacs/blob/master/docs/getting_started.org#installing-packages-from-external-sources][doom]] syntax[fn:1], but it's essentially the same thing for straight. What we're doing here is installing a 'package' that contains no elisp, and then compiling the grammar and moving it into the directory where we'd like to store our tree-sitter grammars. You'll need to add this same directory to =treesit-extra-load-path= as well.
+
+I think this works great for a couple reasons:
+
+- *Portability* :: If we need to wipe our Emacs installation, we don't need to re-install the grammars manually.
+- *Auto-updating* :: The same way straight will update a package when the GH repo is updated, this should similarly recompile the grammar if any changes are made.
+- *100% Elisp* :: No mucking around with bash scripts!
+
+We need to define =my/tree-sitter-compile-grammar= for this to actually work. Here's the definition:
+
+#+begin_src emacs-lisp
+(defun my/tree-sitter-compile-grammar (destination &optional path)
+  "Compile grammar at PATH, and place the resulting shared library in DESTINATION."
+  (interactive "fWhere should we put the shared library? \nfWhat tree-sitter grammar are we compiling? \n")
+  (make-directory destination 'parents)
+
+  (let* ((default-directory
+          (expand-file-name "src/" (or path default-directory)))
+         (parser-name
+          (thread-last (expand-file-name "grammar.json" default-directory)
+                       (json-read-file)
+                       (alist-get 'name)))
+         (emacs-module-url
+          "https://raw.githubusercontent.com/casouri/tree-sitter-module/master/emacs-module.h")
+         (tree-sitter-lang-in-url
+          "https://raw.githubusercontent.com/casouri/tree-sitter-module/master/tree-sitter-lang.in")
+         (needs-cpp-compiler nil))
+    (message "Compiling grammar at %s" path)
+
+    (url-copy-file emacs-module-url "emacs-module.h" :ok-if-already-exists)
+    (url-copy-file tree-sitter-lang-in-url "tree-sitter-lang.in" :ok-if-already-exists)
+
+    (with-temp-buffer
+      (unless
+          (zerop
+           (apply #'call-process
+                  (if (file-exists-p "scanner.cc") "c++" "cc") nil t nil
+                  "parser.c" "-I." "--shared" "-o"
+                  (expand-file-name
+                   (format "libtree-sitter-%s%s" parser-name module-file-suffix)
+                   destination)
+                  (cond ((file-exists-p "scanner.c") '("scanner.c"))
+                        ((file-exists-p "scanner.cc") '("scanner.cc")))))
+        (user-error
+         "Unable to compile grammar, please file a bug report\n%s"
+         (buffer-string))))
+    (message "Completed compilation")))
+#+end_src
+
+This essentially ports the bash script in casouri's repo into an elisp function. This function can also be called interactively, if you don't want to use straight.
+So that's it, I hope you found this useful and please let me know if this works for you!
+
+* Footnotes
+
+[fn:1] For doom users, I had to define =my/tree-sitter-compile-grammar= above the =package!= statement in =package.el=, due to the way package updating works.
