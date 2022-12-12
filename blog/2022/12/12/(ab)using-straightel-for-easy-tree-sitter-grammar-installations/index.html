@@ -34,9 +34,9 @@ Tree-sitter support has officially landed into Emacs 29, which is awesome! Howev
 Back when I was working on <a href="https://github.com/ethan-leba/tree-edit">tree-edit</a> (I swear I&rsquo;ll get back to it soon™!), I realized that most grammars in their current states were poorly constructed for structural editing. So I needed to come up with an easy way for users to install custom grammars outside of what <code>tree-sitter-langs</code> provided. As it turns out, now that there&rsquo;s no <code>tree-sitter-langs</code> equivalent for the built-in tree-sitter, this could be a quite useful technique!
 </p>
 
-<div id="outline-container-orgb49c045" class="outline-2">
-<h2 id="orgb49c045">The technique</h2>
-<div class="outline-text-2" id="text-orgb49c045">
+<div id="outline-container-org9377290" class="outline-2">
+<h2 id="org9377290">The technique</h2>
+<div class="outline-text-2" id="text-org9377290">
 <p>
 <a href="https://github.com/radian-software/straight.el">straight.el</a> allows us to specify a <code>:post-build</code> keyword, in which we can specify any abritrary elisp to run after a package is built (or any shell commands too, for that matter). So we can use <code>straight</code> to clone a tree-sitter grammar, and then use the <code>:post-build</code> step to compile the grammar and place it somewhere <code>treesit</code> can use it. Here&rsquo;s an example of how you might do this:
 </p>
@@ -146,7 +146,6 @@ For doom users, I had to define <code>my/tree-sitter-compile-grammar</code> abov
        </script>
       </section>
       <script src="//code.jquery.com/jquery-latest.min.js"></script>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
       <script src="/media/js/main.js"></script>
       <!-- Cloudflare Web Analytics -->
