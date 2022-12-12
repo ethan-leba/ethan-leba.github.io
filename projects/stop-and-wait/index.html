@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en-us">
   <head>
-    <title>Tag: React.js - Ethan Leba</title>
+    <title>Stop-and-wait proof - Ethan Leba</title>
     <meta charset="utf-8" />
     <meta name="author" content="Ethan Leba" />
+    <meta name="description" content="Proving correctness of the stop-and-wait protocol" />
+    <meta name="keywords" content="ACL2, theorem-proving, lisp" />
     <link rel="stylesheet" href="/media/css/main.css" type="text/css">
     <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
   </head>
@@ -21,15 +23,40 @@
         </ul>
       </header>
     </div>
+
+<div>
+<div class="post">
+<h1>Stop-and-wait proof</h1>
+<p>
+This was the final project of the class Logic and Computation I took during the
+spring 2021 semester. In this project I proved the resilience of the
+stop-and-wait protocol (most commonly used in bluebooth, a subset of TCP) to
+network failures -- showing that the data will never be malformed.
+</p>
+
+<p>
+The paper can be viewed <a href="/assets/projects/stop-and-wait/writeup.pdf">here</a>, and the source code can be viewed on GitHub <a href="https://github.com/ethan-leba/stop-and-wait-arq-proof">here</a>.
+</p>
+
+</div>
+</div>
     <div>
-      <div class="post">
-        <h1>Tag: React.js</h1>
-        <ul class="org-ul">
-          <li><a href="/projects/transcriboid">Transcriboid</a></li>
-        </ul>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2021-05-09</span>
+        <span title="last modification date" class="post-info">2021-05-09</span>
+        <span title="tags" class="post-info"><a href="/tags/acl2/">ACL2</a>, <a href="/tags/theorem-proving/">theorem-proving</a>, <a href="/tags/lisp/">lisp</a></span>
+        <span title="author" class="post-info">Ethan Leba</span>
       </div>
-    </div>
-    <div>
+      <section>
+        <h1>Comments</h1>
+       <script src="https://utteranc.es/client.js"
+               repo="ethan-leba/ethan-leba.github.io"
+               issue-term="pathname"
+               theme="github-light"
+               crossorigin="anonymous"
+               async>
+       </script>
+      </section>
       <script src="//code.jquery.com/jquery-latest.min.js"></script>
       <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
       <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
@@ -47,5 +74,6 @@
         </p>
       </div>
     </div>
+
   </body>
 </html>

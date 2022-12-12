@@ -2,18 +2,32 @@
 <rss version="2.0">
   <channel>
     <title>Ethan Leba</title>
-    <link>http://www.ethanleba.com</link>
-    <description>foo bar</description>
-    <pubDate>Wed, 05 May 2021 17:52:44 EDT</pubDate>
-    <lastBuildDate>Wed, 05 May 2021 17:52:44 EDT</lastBuildDate>
+    <link>http://www.leba.dev</link>
+    <description></description>
+    <pubDate>Mon, 12 Dec 2022 15:00:41 EST</pubDate>
+    <lastBuildDate>Mon, 12 Dec 2022 15:00:41 EST</lastBuildDate>
     <docs>http://www.rssboard.org/rss-specification</docs>
     <generator>Org-page static site generator (https://github.com/kelvinh/org-page)</generator>
     <item>
+      <title>(Ab)using straight.el for easy tree-sitter grammar installations!</title>
+      <link>http://www.leba.dev/blog/2022/12/12/(ab)using-straightel-for-easy-tree-sitter-grammar-installations</link>
+      <description><![CDATA[:post-build ftw]]></description>
+      <pubDate>2022-12-12</pubDate>
+      <guid>http://www.leba.dev/blog/2022/12/12/(ab)using-straightel-for-easy-tree-sitter-grammar-installations</guid>
+    </item>
+    <item>
+      <title>Stop-and-wait proof</title>
+      <link>http://www.leba.dev/projects/stop-and-wait</link>
+      <description><![CDATA[Proving correctness of the stop-and-wait protocol]]></description>
+      <pubDate>2021-05-09</pubDate>
+      <guid>http://www.leba.dev/projects/stop-and-wait</guid>
+    </item>
+    <item>
       <title>Transcriboid</title>
-      <link>http://www.ethanleba.com/projects/transcriboid</link>
+      <link>http://www.leba.dev/projects/transcriboid</link>
       <description><![CDATA[A musical ear trainer web app]]></description>
-      <pubDate>2021-05-04</pubDate>
-      <guid>http://www.ethanleba.com/projects/transcriboid</guid>
+      <pubDate>2021-05-05</pubDate>
+      <guid>http://www.leba.dev/projects/transcriboid</guid>
     </item>
   </channel>
 </rss>

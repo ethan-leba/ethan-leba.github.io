@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <title>(Ab)using straight.el for easy tree-sitter grammar installations! - Ethan Leba</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Ethan Leba" />
+    <meta name="description" content=":post-build ftw" />
+    <link rel="stylesheet" href="/media/css/main.css" type="text/css">
+    <link rel="stylesheet" href="/media/css/prettify.css" type="text/css">
+  </head>
+  <body class="container">
+    <div>
+      <header class="masthead">
+        <h1 class="masthead-title"><a href="/">Ethan Leba</a></h1>
+        <p></p>
+        <ul>
+          <li><a href="/blog/">Blog</a></li>
+          <li><a href="/projects/">Projects</a></li>
+          <li><a href="/tags/">Tags</a></li>
+          <li><a href="https://github.com/ethan-leba">GitHub</a></li>
+          <li><a href="/rss.xml">RSS</a></li>
+        </ul>
+      </header>
+    </div>
+
+<div>
+<div class="post">
+<h1>(Ab)using straight.el for easy tree-sitter grammar installations!</h1>
+<p>
+Tree-sitter support has officially landed into Emacs 29, which is awesome! However, unlike the 3rd party version of <a href="https://github.com/emacs-tree-sitter/elisp-tree-sitter">emacs-tree-sitter</a> which provides <a href="https://github.com/emacs-tree-sitter/tree-sitter-langs">a set of grammars as a package</a>, there&rsquo;s no easy way to install grammars with the newly builtin tree-sitter (AFAIK). The best option I&rsquo;ve seen online so far is to clone <a href="https://github.com/casouri/tree-sitter-module">casouri/tree-sitter-module</a>, and run some scripts manually. I think we can all agree that&rsquo;s not ideal!
+</p>
+
+<p>
+Back when I was working on <a href="https://github.com/ethan-leba/tree-edit">tree-edit</a> (I swear I&rsquo;ll get back to it soon™!), I realized that most grammars in their current states were poorly constructed for structural editing. So I needed to come up with an easy way for users to install custom grammars outside of what <code>tree-sitter-langs</code> provided. As it turns out, now that there&rsquo;s no <code>tree-sitter-langs</code> equivalent for the built-in tree-sitter, this could be a quite useful technique!
+</p>
+
+<div id="outline-container-orgb49c045" class="outline-2">
+<h2 id="orgb49c045">The technique</h2>
+<div class="outline-text-2" id="text-orgb49c045">
+<p>
+<a href="https://github.com/radian-software/straight.el">straight.el</a> allows us to specify a <code>:post-build</code> keyword, in which we can specify any abritrary elisp to run after a package is built (or any shell commands too, for that matter). So we can use <code>straight</code> to clone a tree-sitter grammar, and then use the <code>:post-build</code> step to compile the grammar and place it somewhere <code>treesit</code> can use it. Here&rsquo;s an example of how you might do this:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #51afef;">(</span><span style="color: #51afef;">package!</span> tree-sitter-rust
+  <span style="color: #c678dd;">:recipe</span> <span style="color: #c678dd;">(</span><span style="color: #c678dd;">:host</span> github
+           <span style="color: #c678dd;">:repo</span> <span style="color: #98be65;">"tree-sitter/tree-sitter-rust"</span>
+           <span style="color: #c678dd;">:post-build</span>
+           <span style="color: #98be65;">(</span>my/tree-sitter-compile-grammar
+            <span style="color: #a9a1e1;">(</span><span style="color: #a9a1e1;">expand-file-name</span> <span style="color: #98be65;">"ts-grammars"</span> <span style="color: #dcaeea;">user-emacs-directory</span><span style="color: #a9a1e1;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+<p>
+This is <a href="https://github.com/doomemacs/doomemacs/blob/master/docs/getting_started.org#installing-packages-from-external-sources">doom</a> syntax<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>, but it&rsquo;s essentially the same thing for straight. What we&rsquo;re doing here is installing a &rsquo;package&rsquo; that contains no elisp, and then compiling the grammar and moving it into the directory where we&rsquo;d like to store our tree-sitter grammars. You&rsquo;ll need to add this same directory to <code>treesit-extra-load-path</code> as well.
+</p>
+
+<p>
+I think this works great for a couple reasons:
+</p>
+
+<dl class="org-dl">
+<dt><b>Portability</b></dt><dd>If we need to wipe our Emacs installation, we don&rsquo;t need to re-install the grammars manually.</dd>
+<dt><b>Auto-updating</b></dt><dd>The same way straight will update a package when the GH repo is updated, this should similarly recompile the grammar if any changes are made.</dd>
+<dt><b>100% Elisp</b></dt><dd>No mucking around with bash scripts!</dd>
+</dl>
+
+<p>
+We need to define <code>my/tree-sitter-compile-grammar</code> for this to actually work. Here&rsquo;s the definition:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #51afef;">(</span><span style="color: #51afef;">defun</span> <span style="color: #c678dd;">my/tree-sitter-compile-grammar</span> <span style="color: #c678dd;">(</span>destination <span style="color: #c678dd;">&amp;optional</span> path<span style="color: #c678dd;">)</span>
+  <span style="color: #80b2c3; background-color: #32363e;">"Compile grammar at PATH, and place the resulting shared library in DESTINATION."</span>
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">interactive</span> <span style="color: #98be65;">"fWhere should we put the shared library? \nfWhat tree-sitter grammar are we compiling? \n"</span><span style="color: #c678dd;">)</span>
+  <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">make-directory</span> destination <span style="color: #51afef;">'</span><span style="color: #ECBE7B;">parents</span><span style="color: #c678dd;">)</span>
+
+  <span style="color: #c678dd;">(</span><span style="color: #51afef;">let*</span> <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">(</span><span style="color: #dcaeea;">default-directory</span>
+          <span style="color: #51afef;">(</span><span style="color: #a9a1e1;">expand-file-name</span> <span style="color: #98be65;">"src/"</span> <span style="color: #c678dd;">(</span><span style="color: #51afef;">or</span> path <span style="color: #dcaeea;">default-directory</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #a9a1e1;">)</span>
+         <span style="color: #a9a1e1;">(</span>parser-name
+          <span style="color: #51afef;">(</span><span style="color: #51afef;">thread-last</span> <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">expand-file-name</span> <span style="color: #98be65;">"grammar.json"</span> <span style="color: #dcaeea;">default-directory</span><span style="color: #c678dd;">)</span>
+                       <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">json-read-file</span><span style="color: #c678dd;">)</span>
+                       <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">alist-get</span> <span style="color: #51afef;">'</span><span style="color: #ECBE7B;">name</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #a9a1e1;">)</span>
+         <span style="color: #a9a1e1;">(</span>emacs-module-url
+          <span style="color: #98be65;">"https://raw.githubusercontent.com/casouri/tree-sitter-module/master/emacs-module.h"</span><span style="color: #a9a1e1;">)</span>
+         <span style="color: #a9a1e1;">(</span>tree-sitter-lang-in-url
+          <span style="color: #98be65;">"https://raw.githubusercontent.com/casouri/tree-sitter-module/master/tree-sitter-lang.in"</span><span style="color: #a9a1e1;">)</span>
+         <span style="color: #a9a1e1;">(</span>needs-cpp-compiler nil<span style="color: #a9a1e1;">)</span><span style="color: #98be65;">)</span>
+    <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">message</span> <span style="color: #98be65;">"Compiling grammar at %s"</span> path<span style="color: #98be65;">)</span>
+
+    <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">url-copy-file</span> emacs-module-url <span style="color: #98be65;">"emacs-module.h"</span> <span style="color: #c678dd;">:ok-if-already-exists</span><span style="color: #98be65;">)</span>
+    <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">url-copy-file</span> tree-sitter-lang-in-url <span style="color: #98be65;">"tree-sitter-lang.in"</span> <span style="color: #c678dd;">:ok-if-already-exists</span><span style="color: #98be65;">)</span>
+
+    <span style="color: #98be65;">(</span><span style="color: #51afef;">with-temp-buffer</span>
+      <span style="color: #a9a1e1;">(</span><span style="color: #51afef;">unless</span>
+          <span style="color: #51afef;">(</span><span style="color: #a9a1e1;">zerop</span>
+           <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">apply</span> <span style="color: #51afef;">#'</span><span style="color: #ECBE7B;">call-process</span>
+                  <span style="color: #98be65;">(</span><span style="color: #51afef;">if</span> <span style="color: #a9a1e1;">(</span><span style="color: #a9a1e1;">file-exists-p</span> <span style="color: #98be65;">"scanner.cc"</span><span style="color: #a9a1e1;">)</span> <span style="color: #98be65;">"c++"</span> <span style="color: #98be65;">"cc"</span><span style="color: #98be65;">)</span> nil t nil
+                  <span style="color: #98be65;">"parser.c"</span> <span style="color: #98be65;">"-I."</span> <span style="color: #98be65;">"--shared"</span> <span style="color: #98be65;">"-o"</span>
+                  <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">expand-file-name</span>
+                   <span style="color: #a9a1e1;">(</span><span style="color: #a9a1e1;">format</span> <span style="color: #98be65;">"libtree-sitter-%s%s"</span> parser-name <span style="color: #dcaeea;">module-file-suffix</span><span style="color: #a9a1e1;">)</span>
+                   destination<span style="color: #98be65;">)</span>
+                  <span style="color: #98be65;">(</span><span style="color: #51afef;">cond</span> <span style="color: #a9a1e1;">(</span><span style="color: #51afef;">(</span><span style="color: #a9a1e1;">file-exists-p</span> <span style="color: #98be65;">"scanner.c"</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">'</span><span style="color: #51afef;">(</span><span style="color: #98be65;">"scanner.c"</span><span style="color: #51afef;">)</span><span style="color: #a9a1e1;">)</span>
+                        <span style="color: #a9a1e1;">(</span><span style="color: #51afef;">(</span><span style="color: #a9a1e1;">file-exists-p</span> <span style="color: #98be65;">"scanner.cc"</span><span style="color: #51afef;">)</span> <span style="color: #51afef;">'</span><span style="color: #51afef;">(</span><span style="color: #98be65;">"scanner.cc"</span><span style="color: #51afef;">)</span><span style="color: #a9a1e1;">)</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+        <span style="color: #51afef;">(</span><span style="color: #a9a1e1;">user-error</span>
+         <span style="color: #98be65;">"Unable to compile grammar, please file a bug report\n%s"</span>
+         <span style="color: #c678dd;">(</span><span style="color: #a9a1e1;">buffer-string</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span><span style="color: #a9a1e1;">)</span><span style="color: #98be65;">)</span>
+    <span style="color: #98be65;">(</span><span style="color: #a9a1e1;">message</span> <span style="color: #98be65;">"Completed compilation"</span><span style="color: #98be65;">)</span><span style="color: #c678dd;">)</span><span style="color: #51afef;">)</span>
+</pre>
+</div>
+
+<p>
+This essentially ports the bash script in casouri&rsquo;s repo into an elisp function. This function can also be called interactively, if you don&rsquo;t want to use straight.
+So that&rsquo;s it, I hope you found this useful and please let me know if this works for you!
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
+For doom users, I had to define <code>my/tree-sitter-compile-grammar</code> above the <code>package!</code> statement in <code>package.el</code>, due to the way package updating works.
+</p></div></div>
+
+
+</div>
+</div>
+</div>
+</div>
+    <div>
+      <div class="post-meta">
+        <span title="post date" class="post-info">2022-12-12</span>
+        <span title="last modification date" class="post-info">2022-12-12</span>
+        <span title="tags" class="post-info"><a href="/tags/emacs/">emacs</a>, <a href="/tags/tree-sitter/">tree-sitter</a>, <a href="/tags/straight/">straight</a></span>
+        <span title="author" class="post-info">Ethan Leba</span>
+      </div>
+      <section>
+        <h1>Comments</h1>
+       <script src="https://utteranc.es/client.js"
+               repo="ethan-leba/ethan-leba.github.io"
+               issue-term="pathname"
+               theme="github-light"
+               crossorigin="anonymous"
+               async>
+       </script>
+      </section>
+      <script src="//code.jquery.com/jquery-latest.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r298/prettify.js"></script>
+      <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+      <script src="/media/js/main.js"></script>
+      <!-- Cloudflare Web Analytics -->
+      <script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "498980058f73413e9aeb803e5f1196d0"}'></script>
+      <!-- End Cloudflare Web Analytics -->
+      <div class="footer">
+        <p>Generated by <a href="http://www.gnu.org/software/emacs/">Emacs</a> 30.x (<a href="http://orgmode.org">Org mode</a> 9.x)</p>
+        <p>
+          Copyright &copy; 2012 - <span id="footerYear"></span> <a href="mailto:ethanleba5 &lt;at&gt; gmail &lt;dot&gt; com">Ethan Leba</a>
+          &nbsp;&nbsp;-&nbsp;&nbsp;
+          Powered by <a href="https://github.com/kelvinh/org-page" target="_blank">org-page</a>
+          <script type="text/javascript">document.getElementById("footerYear").innerHTML = (new Date()).getFullYear();</script>
+        </p>
+      </div>
+    </div>
+
+  </body>
+</html>
